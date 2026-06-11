@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoQuiz – Environment & Disaster Management</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #1D9E75; --primary-dark: #0F6E56; --primary-light: #E1F5EE;
+  --accent: #534AB7; --accent-light: #EEEDFE;
+  --danger: #E24B4A; --danger-light: #FCEBEB;
+  --success: #3B6D11; --success-light: #EAF3DE;
+  --warning: #BA7517; --warning-light: #FAEEDA;
+  --gray: #5F5E5A; --gray-light: #F1EFE8;
+  --text: #2C2C2A; --text-muted: #5F5E5A;
+  --border: rgba(0,0,0,0.12);
+  --white: #ffffff; --bg: #f4f6f3;
+  --card-bg: #ffffff;
+  --opt-bg: #ffffff;
+  --opt-hover-bg: #E1F5EE;
+  --header-bg: #0F6E56;
+  --toggle-bg: rgba(255,255,255,0.2);
+  --progress-track: #D3D1C7;
+}
+
+[data-theme="dark"] {
+  --primary: #1D9E75; --primary-dark: #5DCAA5; --primary-light: #085041;
+  --accent: #AFA9EC; --accent-light: #26215C;
+  --danger: #F09595; --danger-light: #501313;
+  --success: #97C459; --success-light: #173404;
+  --warning: #EF9F27; --warning-light: #412402;
+  --gray: #B4B2A9; --gray-light: #2C2C2A;
+  --text: #F1EFE8; --text-muted: #B4B2A9;
+  --border: rgba(255,255,255,0.1);
+  --white: #1e1e1e; --bg: #111211;
+  --card-bg: #1e1e1e;
+  --opt-bg: #252624;
+  --opt-hover-bg: #085041;
+  --header-bg: #085041;
+  --toggle-bg: rgba(255,255,255,0.12);
+  --progress-track: #2C2C2A;
+}
+
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; transition: background 0.25s, color 0.25s; }
+
+/* HEADER */
+header { background: var(--header-bg); color: white; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
+header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
+.header-right { display: flex; align-items: center; gap: 0.75rem; }
+.header-sub { font-size: 0.76rem; opacity: 0.82; background: rgba(255,255,255,0.15); padding: 0.26rem 0.65rem; border-radius: 20px; }
+
+/* DARK MODE TOGGLE */
+.toggle-wrap { display: flex; align-items: center; gap: 0.4rem; }
+.toggle-label { font-size: 0.75rem; color: rgba(255,255,255,0.8); }
+.toggle { position: relative; width: 42px; height: 24px; cursor: pointer; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track { position: absolute; inset: 0; background: var(--toggle-bg); border-radius: 99px; border: 1px solid rgba(255,255,255,0.2); transition: background 0.25s; }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.25s; display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; }
+.toggle input:checked ~ .toggle-track { background: rgba(255,255,255,0.3); }
+.toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+/* MAIN */
+main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+.container { width: 100%; max-width: 800px; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* HOME */
+.home-hero { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); padding: 2.5rem 2rem; text-align: center; margin-bottom: 1.25rem; transition: background 0.25s, border-color 0.25s; }
+.home-hero .big-icon { font-size: 3.5rem; margin-bottom: 0.75rem; }
+.home-hero h2 { font-size: 1.8rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+.home-hero .tagline { color: var(--text-muted); font-size: 0.95rem; max-width: 450px; margin: 0 auto 1.5rem; line-height: 1.6; }
+.stat-chips { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+.chip { background: var(--primary-light); color: var(--primary-dark); border-radius: 20px; padding: 0.4rem 0.9rem; font-size: 0.82rem; font-weight: 700; }
+.mode-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.85rem; margin-bottom: 1.75rem; text-align: left; }
+.mode-card { background: var(--opt-bg); border: 2px solid var(--border); border-radius: 12px; padding: 1.1rem; cursor: pointer; transition: all 0.15s; }
+.mode-card:hover, .mode-card.sel { border-color: var(--primary); background: var(--primary-light); }
+.mode-card .mi { font-size: 1.8rem; margin-bottom: 0.4rem; }
+.mode-card h3 { font-size: 0.95rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.2rem; }
+.mode-card p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+.btn-start { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 0.85rem 2.8rem; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+.btn-start:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+/* QUIZ */
+.progress-wrap { background: var(--progress-track); border-radius: 99px; height: 8px; margin-bottom: 1.25rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.4s ease; }
+.quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem; }
+.q-meta { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+.badge { border-radius: 20px; padding: 0.25rem 0.65rem; font-size: 0.75rem; font-weight: 800; }
+.badge-round { background: var(--accent-light); color: var(--accent); }
+.badge-timer { background: var(--warning-light); color: var(--warning); display: flex; align-items: center; gap: 0.3rem; }
+.badge-timer.urgent { background: var(--danger-light); color: var(--danger); }
+.question-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); padding: 1.75rem; margin-bottom: 1rem; transition: background 0.25s, border-color 0.25s; }
+.q-num { font-size: 0.73rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.65rem; }
+.q-text { font-size: 1.05rem; font-weight: 600; color: var(--text); line-height: 1.55; }
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 1rem; }
+@media (max-width: 520px) { .options-grid { grid-template-columns: 1fr; } }
+.opt-btn { background: var(--opt-bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.8rem 0.9rem; font-size: 0.88rem; color: var(--text); cursor: pointer; text-align: left; display: flex; align-items: flex-start; gap: 0.55rem; transition: all 0.15s; line-height: 1.4; word-break: break-word; }
+.opt-btn:hover:not(:disabled) { border-color: var(--primary); background: var(--opt-hover-bg); transform: translateY(-1px); }
+.opt-btn:disabled { cursor: default; }
+.opt-btn.correct { background: var(--success-light); border-color: var(--success); color: var(--success); }
+.opt-btn.wrong { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+.opt-btn.missed { background: var(--success-light); border-color: var(--success); color: var(--success); opacity: 0.8; }
+.opt-lbl { background: var(--gray-light); color: var(--gray); border-radius: 5px; padding: 0.05rem 0.4rem; font-weight: 900; font-size: 0.78rem; flex-shrink: 0; min-width: 22px; text-align: center; }
+.opt-btn.correct .opt-lbl { background: var(--success); color: white; }
+.opt-btn.wrong .opt-lbl { background: var(--danger); color: white; }
+.opt-btn.missed .opt-lbl { background: var(--success); color: white; }
+.feedback { border-radius: 9px; padding: 0.75rem 1rem; font-size: 0.88rem; font-weight: 600; margin-bottom: 1rem; display: none; align-items: center; gap: 0.5rem; }
+.feedback.show-correct { display: flex; background: var(--success-light); color: var(--success); }
+.feedback.show-wrong { display: flex; background: var(--danger-light); color: var(--danger); }
+.btn-next { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 0.8rem; font-size: 0.93rem; font-weight: 800; cursor: pointer; transition: background 0.15s; width: 100%; }
+.btn-next:hover { background: var(--primary-dark); }
+.btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* RESULTS */
+.results-hero { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); padding: 2.5rem 2rem; text-align: center; margin-bottom: 1.25rem; transition: background 0.25s; }
+.score-ring { width: 116px; height: 116px; border-radius: 50%; border: 5px solid var(--primary); background: var(--primary-light); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.1rem; }
+.score-ring .sn { font-size: 1.9rem; font-weight: 900; color: var(--primary-dark); line-height: 1; }
+.score-ring .sl { font-size: 0.68rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.06em; }
+.results-hero h2 { font-size: 1.45rem; font-weight: 800; margin-bottom: 0.35rem; }
+.results-hero .sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.res-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+.rs { border-radius: 10px; padding: 0.85rem; }
+.rs .rv { font-size: 1.5rem; font-weight: 900; }
+.rs .rl { font-size: 0.72rem; font-weight: 700; margin-top: 0.15rem; }
+.rs.g { background: var(--success-light); color: var(--success); }
+.rs.r { background: var(--danger-light); color: var(--danger); }
+.rs.b { background: var(--accent-light); color: var(--accent); }
+.btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+.btn-sec { border: 2px solid var(--primary); background: transparent; color: var(--primary); border-radius: 10px; padding: 0.7rem 1.4rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: background 0.15s; }
+.btn-sec:hover { background: var(--primary-light); }
+.btn-pri { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 0.7rem 1.4rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: background 0.15s; }
+.btn-pri:hover { background: var(--primary-dark); }
+.review-section { margin-top: 1.25rem; }
+.review-section h3 { font-size: 0.95rem; font-weight: 800; color: var(--text); margin-bottom: 0.85rem; padding-left: 0.25rem; }
+.ri { background: var(--card-bg); border: 1px solid var(--border); border-radius: 11px; padding: 1rem 1.15rem; margin-bottom: 0.65rem; border-left: 4px solid var(--success); transition: background 0.25s; }
+.ri.wrong { border-left-color: var(--danger); }
+.ri-q { font-size: 0.86rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+.ri-ans { font-size: 0.8rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.ri-c { color: var(--success); font-weight: 700; }
+.ri-u { color: var(--danger); font-weight: 700; }
+.congrats-banner { background: linear-gradient(135deg, var(--primary-dark), var(--accent)); color: white; border-radius: 14px; padding: 2rem; text-align: center; margin-bottom: 1.25rem; }
+.congrats-banner .trophy { font-size: 3rem; margin-bottom: 0.6rem; }
+.congrats-banner h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: 0.35rem; }
+.congrats-banner p { opacity: 0.88; font-size: 0.9rem; }
+footer { text-align: center; padding: 1.1rem; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌿 EcoQuiz</h1>
+  <div class="header-right">
+    <span class="header-sub">Environment &amp; Disaster Management</span>
+    <div class="toggle-wrap">
+      <span class="toggle-label" id="toggle-label">🌙</span>
+      <label class="toggle" aria-label="Toggle dark mode">
+        <input type="checkbox" id="dark-toggle" onchange="toggleDark(this)">
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb" id="toggle-thumb">🌙</span>
+      </label>
+    </div>
+  </div>
+</header>
+<main>
+<div class="container">
+
+<!-- HOME SCREEN -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <div class="big-icon">🌍</div>
+    <h2>Test Your Knowledge</h2>
+    <p class="tagline">A comprehensive quiz covering Environment, Ecology, Pollution, Disaster Management and Biodiversity. Get every question right to finish!</p>
+    <div class="stat-chips">
+      <span class="chip">📚 145 Questions</span>
+      <span class="chip">🔁 Multi-round until perfect</span>
+      <span class="chip">📊 Detailed review</span>
+    </div>
+    <div class="mode-cards">
+      <div class="mode-card sel" data-mode="normal" onclick="selectMode(this)">
+        <div class="mi">📖</div>
+        <h3>Normal Mode</h3>
+        <p>Take your time. No pressure. Best for learning.</p>
+      </div>
+      <div class="mode-card" data-mode="timed" onclick="selectMode(this)">
+        <div class="mi">⏱️</div>
+        <h3>Timed Mode</h3>
+        <p>30 seconds per question. Tests quick recall.</p>
+      </div>
+      <div class="mode-card" data-mode="wrongonly" onclick="selectMode(this)">
+        <div class="mi">🎯</div>
+        <h3>Weak Spots</h3>
+        <p>Only questions you got wrong. Review and improve.</p>
+      </div>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div class="screen" id="screen-quiz">
+  <div class="progress-wrap"><div class="progress-fill" id="pfill" style="width:0%"></div></div>
+  <div class="quiz-top">
+    <span class="q-meta" id="q-counter">Question 1 of 145</span>
+    <span class="badge badge-round" id="round-badge">Round 1</span>
+    <span class="badge badge-timer" id="timer-badge" style="display:none">⏱ <span id="timer-val">30</span>s</span>
+  </div>
+  <div class="question-card">
+    <div class="q-num" id="q-num">Q1</div>
+    <div class="q-text" id="q-text"></div>
+  </div>
+  <div class="options-grid" id="opts"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQ()" disabled>Next Question →</button>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div class="screen" id="screen-results">
+  <div id="results-content"></div>
+</div>
+
+</div>
+</main>
+<footer>EcoQuiz · 145 Questions · Environment &amp; Disaster Management</footer>
+<script>
+const ALL_Q = [{"q":"IMD is also known as……","A":"International Meteorological Department","B":"Indian Mining Department","C":"Indian Maritime Department","D":"Indian Meteorological Department","ans":"D"},{"q":"How much India land areas are prone to flood and river erosion?","A":"12%","B":"15%","C":"20%","D":"25%","ans":"A"},{"q":"The full name of AES is……………………….","A":"Advanced Encephalitis Syndrome","B":"Acute Encephalitis Syndrome","C":"Abnormal Encephalitis Syndrome","D":"Additional Encephalitis Syndrome","ans":"B"},{"q":"El-nino is the result of………………","A":"Drought","B":"Climate Change","C":"Earthquake","D":"Eclipse","ans":"B"},{"q":"Flood Forecasting and Warning system of India works under the guidance of……………………………….","A":"Central Water Commission","B":"Ministry of Environment, Forest & climate change","C":"State government","D":"Department of Science & Technology","ans":"A"},{"q":"………………..can be defined as the occurrence of an illness or other health-related event that is clearly in excess of unexpected occurrence.","A":"AIDS","B":"Epidemic","C":"TB","D":"None of these","ans":"B"},{"q":"Full form of CPCB is……………………………","A":"Central Population Control Board","B":"Common Population Control Board","C":"Central Public Control Board","D":"Central Pollution Control Board","ans":"D"},{"q":"What is UNEP?","A":"United Nations Environment Policy","B":"United Nations Environment Programme","C":"United Nations Education Programme","D":"United Nations Environmental Protection","ans":"B"},{"q":"Who has given the concept of biodiversity hot spots?","A":"Tansley","B":"Clement","C":"Myer","D":"Grinnell","ans":"C"},{"q":"Dr Salim Ali Centre for Ornithology is located at…………………..","A":"Hyderabad","B":"Banglore","C":"Coimbatore","D":"Chennai","ans":"C"},{"q":"Minimata disease occurred due to……………….","A":"Cadmium pollution","B":"Selenium pollution","C":"Arsenic pollution","D":"Mercury pollution","ans":"D"},{"q":"Clostridium botulinum is responsible for……….","A":"Dengue","B":"Cholera","C":"Food poisoning","D":"Diarrhea","ans":"C"},{"q":"Which one is responsible for tooth disease in human beings?","A":"Nitrate","B":"Fluoride","C":"Phosphate","D":"Sulphate","ans":"B"},{"q":"The rate of change in temperature observed while moving upward through the earth's atmosphere is called as………….","A":"Lapse rate","B":"Isobaric rate","C":"Pulse rate","D":"Isochoric rate","ans":"A"},{"q":"Lakes that have high nutrient concentration are referred as………………………...","A":"Thermotrophic","B":"Oligotrophic","C":"Eutrophic","D":"Dystrophic","ans":"C"},{"q":"PAN is a type of……………………………….","A":"Fossil fuel","B":"Halones","C":"Photochemical smog","D":"Ozone depleting substance","ans":"C"},{"q":"The full name of HCFC is…………………….","A":"Hydrocarbon and chlorofluorocarbons","B":"Heavy chlorofluorocarbons","C":"High chlorofluorocarbons","D":"Hydrochlorofluorocarbons","ans":"D"},{"q":"Which of the following plants is extremely sensitive towards sulphur dioxide?","A":"Tomato","B":"Onion","C":"Potato","D":"Corn","ans":"A"},{"q":"Which of the following type of pollution is Cultural eutrophication?","A":"Noise pollution","B":"Thermal pollution","C":"Soil pollution","D":"Water pollution","ans":"D"},{"q":"What is the significance of the ionosphere?","A":"Aviation movements","B":"High frequency radio transmission","C":"Regulates weather","D":"All of these","ans":"B"},{"q":"The negative effects of climate change will include……………….","A":"Flooding","B":"Water scarcity","C":"Less production","D":"All of these","ans":"D"},{"q":"Photochemical Smog is the resultant of ………………….","A":"Air pollution","B":"Landslide","C":"Soil pollution","D":"Earthquake","ans":"A"},{"q":"Which one is emitted by automobile exhaust?","A":"Fluoride","B":"Arsenic","C":"Nitrate","D":"Chromium","ans":"B"},{"q":"Disaster management cycle can be divided into………………….","A":"Pre and Post Disaster Management","B":"Response and Recovery","C":"Mitigation and Prevention","D":"Risk and Chance","ans":"A"},{"q":"Urban flooding is the resultant of……………………","A":"Poor Sewerage Management","B":"Siltation of drains","C":"Climate change","D":"All of these","ans":"D"},{"q":"Which one the most dangerous waste for living beings?","A":"Oil spills","B":"Plastic wastes","C":"Radioactive waste","D":"Biomedical wastes","ans":"C"},{"q":"Which one is not a contagious disease?","A":"Chicken pox","B":"AIDS","C":"Plague","D":"Corona","ans":"B"},{"q":"Which one is counted as a big risk factor for city areas?","A":"Water scarcity","B":"Unplanned development pattern","C":"Waste management","D":"None of these","ans":"B"},{"q":"Which is the most contagious waste?","A":"Solid waste","B":"Municipal Waste","C":"Bio-medical waste","D":"E-waste","ans":"C"},{"q":"Which river is known as 'sorrow of Bihar'?","A":"Brahmaputra","B":"Ganges","C":"Kosi","D":"Son","ans":"C"},{"q":"Which is/are the methods of waste management?","A":"Landfill","B":"Incineration","C":"Composting","D":"All of these","ans":"D"},{"q":"Construction of Checkdams can prevent from the hazard of…………","A":"Landslide","B":"Drought","C":"Flood","D":"Earthquake","ans":"B"},{"q":"Kyoto protocol was organized in……………………….","A":"1985","B":"2000","C":"1997","D":"2005","ans":"C"},{"q":"Global warming is the resultant of…………………","A":"Soil pollution","B":"Water pollution","C":"Green house gas emission","D":"Noise pollution","ans":"C"},{"q":"India receives an annual rainfall around………………","A":"1100 mm","B":"1200 mm","C":"1300 mm","D":"1400 mm","ans":"B"},{"q":"In which year the devastating Tsunami came in Indian coastal areas?","A":"2004","B":"2001","C":"1999","D":"1998","ans":"A"},{"q":"Which one is a contagious disease?","A":"AIDS","B":"Nausea","C":"Chicken pox","D":"Dengue","ans":"C"},{"q":"Kyoto protocol was organized for the reduction of………………...","A":"Water pollution","B":"Noise pollution","C":"Green house gases","D":"Soil pollution","ans":"C"},{"q":"Sendai framework was organized for the management of……………………","A":"Global warming","B":"Green house gases","C":"Disasters","D":"Industrial pollution","ans":"C"},{"q":"In which year, a National Policy on Disaster Management was issued for India?","A":"2005","B":"2006","C":"2007","D":"2009","ans":"D"},{"q":"HIV is also known as…………….","A":"High Immune Virus","B":"Human Interior Virus","C":"Human Immune Virus","D":"Highrisk Immune Virus","ans":"C"},{"q":"Punjab and Haryana states have river water dispute on the rivers","A":"Ravi-Beas water","B":"Ganga water","C":"Satluj water","D":"Yamuna water","ans":"A"},{"q":"What is the branch of science which deals with the formation and distribution of soil?","A":"Ecology","B":"Biology","C":"Pedology","D":"Seismology","ans":"C"},{"q":"Luminous pollution is also known as-","A":"Photo pollution","B":"Air pollution","C":"Water pollution","D":"Soil pollution","ans":"A"},{"q":"Which is the best method for the management of biomedical wastes?","A":"Composting","B":"Incineration","C":"Sanitary land filling","D":"Open dumping","ans":"B"},{"q":"In 1986, a very important Act was passed by Indian Parliament for the protection of Environment namely…….","A":"The Wild Life (Protection) Act","B":"The Environment (Protection) Act","C":"The Air (Prevention and Control of Pollution) Act","D":"The Water (Prevention and Control of Pollution) Act","ans":"B"},{"q":"……………..is related with Chipko Movement.","A":"Chandi prasad Bhat","B":"G.D.Agrwal","C":"Arundhati Roy","D":"M.C.Mehta","ans":"A"},{"q":"Who has given the concept of biodiversity hotspot?","A":"Tansley","B":"Clement","C":"Myer","D":"Grinnell","ans":"C"},{"q":"IUCN stands for……………………….","A":"International Union for Conservation of Nature","B":"Indian Union for Conservation of Nature","C":"International Union for Conservation of Natural Resources","D":"None of the above","ans":"A"},{"q":"Noise pollution measurement can be done in………………………...","A":"Watt","B":"Frequency","C":"Decibel","D":"All of these","ans":"C"},{"q":"World Ozone Day is celebrated on…………………….","A":"July 16","B":"August 16","C":"September 16","D":"October 16","ans":"C"},{"q":"Soil salinity is the resultant of………………………","A":"Overgrazing","B":"Climate change","C":"Global warming","D":"Over irrigation","ans":"D"},{"q":"Depletion of Ozone hole layer is mainly due to release of…………………...","A":"CFC","B":"CO","C":"O2","D":"CO2","ans":"A"},{"q":"Oceanic acidification occurs due to the dissolution of…………………….","A":"Oxygen","B":"Carbon dioxide","C":"Methane","D":"Nitrogen","ans":"B"},{"q":"Sea level rise is the resultant of……………………………….","A":"Global warming","B":"Oceanic acidification","C":"Ozone depletion","D":"All of these","ans":"A"},{"q":"Ozone is a ………………………………… pollutant in troposphere.","A":"Primary","B":"Secondary","C":"Tertiary","D":"None of these","ans":"B"},{"q":"Widely accepted concept of ecological succession is given by…………………………","A":"Odum","B":"Darwin","C":"Lamarck","D":"Clement","ans":"D"},{"q":"Chipko movement was originated from…………………………...","A":"Uttarakhand","B":"Himachal Pradesh","C":"Bihar","D":"Delhi","ans":"A"},{"q":"Biome is an example of……………………","A":"Tiny ecosystem","B":"Ecology","C":"Environment","D":"Vast ecosystem","ans":"D"},{"q":"Open dumping of solid wastes in environment may pose……………...","A":"No health hazards","B":"Only animal health hazards","C":"Human health hazards","D":"Both human and animal health problems","ans":"D"},{"q":"Electrostatic precipitators are used to control……………………","A":"Water pollution","B":"Soil pollution","C":"Air pollution","D":"Noise pollution","ans":"C"},{"q":"Which Indian Act was introduced in the year of 1981 to reduce the pollution?","A":"Water Pollution Act","B":"Noise Pollution Act","C":"Air Pollution Act","D":"None of these","ans":"C"},{"q":"Montreal Protocol is an international treaty organised for what?","A":"Protection of ozone layer","B":"Protection from global warming","C":"Reducing green house gases","D":"Reducing air pollution","ans":"A"},{"q":"Clean Development Mechanism (CDM) and Certified emission reductions (CERs) are related with……………...","A":"Montreal Protocol","B":"Basel convention","C":"Kyoto protocol","D":"Ramsar Convention","ans":"C"},{"q":"Fukushima incident is related with……………………","A":"Volcanic eruptions","B":"Nuclear accident","C":"Earthquake","D":"Atomic bomb testing","ans":"B"},{"q":"Which of the following is a renewable source of energy?","A":"Ocean currents","B":"Solar energy","C":"Biomass","D":"All of these","ans":"D"},{"q":"Which of the following is biodegradable waste?","A":"Paper","B":"Food waste","C":"Polythene bags","D":"Synthetic fiber","ans":"B"},{"q":"Which of the following air pollution control device has maximum efficiency?","A":"Spray tower","B":"Wet cyclonic scrubber","C":"Electrostatic precipitator","D":"Dynamic precipitator","ans":"C"},{"q":"Which of the following is not a part of photochemical smog?","A":"SPM","B":"PAN","C":"O3","D":"NO2","ans":"A"},{"q":"Which of the following greenhouse gas is contributed by cattle farming?","A":"Carbon monoxide","B":"Nitrous oxide","C":"Methane","D":"All of these","ans":"C"},{"q":"Which place in India receives the highest annual rainfall?","A":"Mawsynram","B":"Cherrapunji","C":"Siju","D":"Phyllut","ans":"A"},{"q":"Which of the following gases is responsible for the yellowing of the Taj Mahal?","A":"Organic carbon","B":"Black carbon","C":"Brown carbon","D":"All of these","ans":"D"},{"q":"Which one is considered as the largest source energy across the world?","A":"Solar","B":"Oil","C":"Geothermal","D":"None of these","ans":"B"},{"q":"Biodiversity hotspot concept was given first time in year…............................","A":"1978","B":"1988","C":"1998","D":"2008","ans":"B"},{"q":"Concept of sustainable development goals are developed by…….","A":"UNO","B":"FAO","C":"ILO","D":"WHO","ans":"A"},{"q":"Deforestation causes……………..","A":"Drought","B":"Accidents","C":"Earthquake","D":"Eclipse","ans":"A"},{"q":"Which one is the main culprit of global warming?","A":"CO","B":"O2","C":"CO2","D":"SO2","ans":"C"},{"q":"How many sustainable development goals are set by United Nations?","A":"17","B":"25","C":"21","D":"29","ans":"A"},{"q":"Green plants have………..pigment which helps in photosynthesis.","A":"Licopene","B":"Chlorophyll","C":"Cytosine","D":"All of these","ans":"B"},{"q":"Decomposers are in…………………….nature.","A":"Saprophytic","B":"Eutrophic","C":"Oligotrophic","D":"None of these","ans":"A"},{"q":"Which of the following is not a biotic component?","A":"Rhizobium","B":"Protozoa","C":"Fungi","D":"Salinity","ans":"D"},{"q":"The sequential food habit of the organisms is known as………….","A":"Food web","B":"Food chain","C":"Ecological niche","D":"All of these","ans":"B"},{"q":"The full form of BOD is………………….","A":"Biochemical Oxygen Demand","B":"Biochemical Orbit Diversion","C":"Biomedical Oxygen Demand","D":"All of these","ans":"A"},{"q":"Ecosystem word is given by which scientist?","A":"Kofi Annan","B":"A.G.Tansley","C":"Al Gore","D":"Wangari Maathai","ans":"B"},{"q":"The scientist who is regarded as father of ecology.","A":"Elton","B":"Clements","C":"Odum","D":"Tansley","ans":"C"},{"q":"Ozone layer is present in which part of the atmosphere?","A":"Troposphere","B":"Ionosphere","C":"Stratosphere","D":"Mesosphere","ans":"C"},{"q":"The living organisms which can prepare their own food are known as…………………….","A":"Heterotrophs","B":"Decomposers","C":"Producers","D":"Consumers","ans":"C"},{"q":"………..are the indicators of pollution free zone.","A":"Fungus","B":"Bacteria","C":"Protozoa","D":"Lichens","ans":"D"},{"q":"The atmospheric layer which is present in the contact of earth…","A":"Troposphere","B":"Stratosphere","C":"Mesosphere","D":"Ionosphere","ans":"A"},{"q":"Reciprocal interrelationship in between organisms and their environment is…………………………….","A":"Ethology","B":"Environment","C":"Ecosystem","D":"Ecology","ans":"D"},{"q":"Most of the environmental problems could be solved through………………….","A":"Establishing more industries","B":"Deforestation","C":"Afforestation","D":"None of these","ans":"C"},{"q":"The most dangerous pollution is……………………..","A":"Air pollution","B":"Nuclear pollution","C":"Soil pollution","D":"Water pollution","ans":"B"},{"q":"The thickness of ozone layer is measured in……………………","A":"Hertz","B":"Dobson units","C":"Kilometers","D":"Nanometre","ans":"B"},{"q":"Ozone depletion is highest in the region of……………………….","A":"South pole","B":"Equator","C":"Tropics","D":"North pole","ans":"A"},{"q":"Nudation is a part which process?","A":"Ecological niche","B":"Endemic","C":"Ecological succession","D":"Ecotype","ans":"C"},{"q":"The ecological succession that starts in an area of adequate moisture is called as…………………...","A":"Psammosere","B":"Hydrarch","C":"Xerarch","D":"Mesarch","ans":"B"},{"q":"What does the phrase 'anthropogenic CO2 emissions' mean?","A":"Natural CO2 emissions","B":"Human made CO2 emissions","C":"Industrial CO2 emissions","D":"All of these","ans":"B"},{"q":"Which of the following is NOT a primary pollutant?","A":"Oxygen","B":"Ground-level ozone","C":"Carbon monoxide","D":"Carbon dioxide","ans":"A"},{"q":"Which of the following gases are main contributors to acid rain?","A":"Carbon dioxide and carbon monoxide","B":"Sulphur dioxide and carbon dioxide","C":"Sulphur dioxide and nitrogen dioxide","D":"Sulphur dioxide and nitrous oxide","ans":"C"},{"q":"Alive part of the environment is also called as……………………...","A":"Abiotic","B":"Biotic","C":"Non-biotic","D":"All of these","ans":"B"},{"q":"Ecology word has been coined by…..................","A":"Odum","B":"Darwin","C":"Hackel","D":"Clement","ans":"C"},{"q":"Ecology word has been derived from 2 greek words Oikos and Logos. What does mean by oikos?","A":"Habitat","B":"Population","C":"Community","D":"None of these","ans":"A"},{"q":"What is the full form of DO?","A":"Dissolved Ozone","B":"Dissolved Oxygen","C":"Dissolved Oil","D":"None of these","ans":"B"},{"q":"Which one is the example of photo-autotroph?","A":"Plants","B":"Bacteria","C":"Green plants","D":"All of these","ans":"C"},{"q":"The direction of flow of energy in an ecosystem is ……..............................","A":"Unidirectional","B":"Multidirectional","C":"Directionless","D":"All of these","ans":"A"},{"q":"Nepenthes is an example of…...................","A":"Bacteria","B":"Fungi","C":"Algae","D":"Insectivorous plant","ans":"D"},{"q":"Lotic water ecosystem is related to…....","A":"Running water ecosystem","B":"Stagnant water ecosystem","C":"Lake","D":"Pond","ans":"A"},{"q":"Aquarium is an example of….....................","A":"Terrestrial ecosystem","B":"Artificial ecosystem","C":"Natural ecosystem","D":"All of these","ans":"B"},{"q":"Father of Indian ecology is….....................","A":"R. Mishra","B":"K.R.Puri","C":"K.D.Sharma","D":"G.S.Verma","ans":"A"},{"q":"IPCC is related with the reporting of……………………","A":"Climate change","B":"Disasters","C":"Floods","D":"None of these","ans":"A"},{"q":"At which state region, India is mostly affected with arsenic contamination?","A":"Bihar","B":"West Bengal","C":"Jharkhand","D":"Uttar Pradesh","ans":"B"},{"q":"……………………....is an example of gaseous cycle.","A":"Hydrological cycle","B":"Sulfur cycle","C":"Phosphorous cycle","D":"All of these","ans":"A"},{"q":"Biosphere is made up of……………………………","A":"Atmosphere","B":"Hydrosphere","C":"Lithosphere","D":"All of these","ans":"D"},{"q":"Kaziranga national park is very famous for the species of……………….","A":"Rhinoceros","B":"Asiatic lion","C":"Tiger","D":"Elephant","ans":"A"},{"q":"DDT is a common……………………","A":"Pesticide","B":"Halon","C":"Coolant","D":"None of these","ans":"A"},{"q":"………………………is the cleanest fossil fuel.","A":"Coal","B":"Petrol","C":"Natural gas","D":"Diesel","ans":"C"},{"q":"Dudhwa National park is located in which state?","A":"Haryana","B":"Uttar Pradesh","C":"Himachal Pradesh","D":"Madhya Pradesh","ans":"B"},{"q":"IUCN compiles………………………","A":"Blue data book","B":"Red data book","C":"Green data book","D":"All of these","ans":"B"},{"q":"Solar energy is an example of………………………………….","A":"Conventional source of energy","B":"Non-conventional source of energy","C":"Traditional source of energy","D":"None of these","ans":"B"},{"q":"Which one does not cause any threat to the biodiversity?","A":"Biological invasion","B":"Habitat destruction","C":"Declaring wild life sanctuaries","D":"Poaching","ans":"C"},{"q":"…………..species that have very restricted distribution and are found in some particular regions.","A":"Endemic species","B":"Genetic species","C":"Plant species","D":"Animal Species","ans":"A"},{"q":"Jim Corbett National Park is located in…………………………….","A":"Uttar Pradesh","B":"Himachal Pradesh","C":"Uttarakhand","D":"Sikkim","ans":"C"},{"q":"What is JFM?","A":"Joint Forest Management","B":"Joint Facility Management","C":"Joint Forecast Management","D":"Joint Fire Management","ans":"A"},{"q":"Sundarbans National Park is located in……………………….","A":"West Bengal","B":"Meghalaya","C":"Sikkim","D":"Odisha","ans":"A"},{"q":"The total number of Biogeographic zones in India is……………………….","A":"2","B":"6","C":"8","D":"10","ans":"D"},{"q":"In which year project Elephant was launched in India?","A":"1973","B":"1986","C":"1992","D":"1998","ans":"C"},{"q":"Which types of coal is having the best quality?","A":"Peat","B":"Lignite","C":"Bituminous","D":"Anthracite","ans":"D"},{"q":"Which types of coal is significantly found in India?","A":"Peat","B":"Lignite","C":"Bituminous","D":"Anthracite","ans":"C"},{"q":"Which types of coal is having the highest calorific value?","A":"Peat","B":"Lignite","C":"Bituminous","D":"Anthracite","ans":"D"},{"q":"Economic importance of water may include…...","A":"Industrial uses","B":"Ecosystem services","C":"Recreational uses","D":"All of these","ans":"D"},{"q":"Nile river water dispute is in between…...................","A":"Egypt, Ethiopia, and Sudan","B":"Syria and Russia","C":"Ethiopia and China","D":"None of these","ans":"A"},{"q":"Soil is a….....................","A":"Renewable natural resource","B":"Non-renewable natural resource","C":"Anthropogenic resource","D":"None of these","ans":"B"},{"q":"Gully soil erosion is due to the formation of…..............","A":"Single rill","B":"Network of rills","C":"Sheet erosion","D":"Grazing","ans":"B"},{"q":"Humus is ….............................content present in fertile soil.","A":"Inorganic","B":"Sand","C":"Organic","D":"Pebbles","ans":"C"},{"q":"Roots of leguminous plants contain…...................................bacteria.","A":"Bascillus","B":"Rhizobium","C":"Pseudomonas","D":"All of these","ans":"B"},{"q":"Permanent loss of biological productivity of soil is known as…..................","A":"Mulching","B":"Flood","C":"Soil erosion","D":"Desertification","ans":"D"},{"q":"Temporary loss of soil fertility is known as…..................","A":"Soil erosion","B":"Land use change","C":"Desertification","D":"Soil acidification","ans":"A"},{"q":"Differences between the genetic characteristics within the individuals of same species is known as…............................","A":"Species biodiversity","B":"Genetic biodiversity","C":"Ecosystem biodiversity","D":"All of these","ans":"B"},{"q":"How many biodiversity hotspots are present in India?","A":"4","B":"3","C":"2","D":"1","ans":"A"},{"q":"Which one is not considered as Indian biodiversity hotspot?","A":"Sundaland","B":"Aravalli hills","C":"Indo-burma","D":"Western Ghat","ans":"B"},{"q":"Which factor is not responsible for biodiversity loss?","A":"Habitat destruction","B":"Poaching","C":"Sacred grooves","D":"Climate change","ans":"C"},{"q":"Nanda devi national park is located at…..................","A":"Uttar Pradesh","B":"Himachal Pradesh","C":"Haryana","D":"Uttarakhand","ans":"D"},{"q":"How many biosphere reserves are present in India?","A":"18","B":"28","C":"36","D":"46","ans":"A"},{"q":"Sundarban National Park is very famous for the presence of ………………….","A":"Sacred groves","B":"Mangroves","C":"Coral reef","D":"All of these","ans":"B"},{"q":"Biodiversity is found at ….......................levels.","A":"4","B":"3","C":"2","D":"1","ans":"B"}];
+
+let mode = 'normal', round = 1, remaining = [], wrongHistory = [];
+let current = 0, answered = false, timerInt = null, timerSec = 30;
+let roundResults = [], sessionWrong = [];
+
+try { wrongHistory = JSON.parse(localStorage.getItem('eq_wrong') || '[]'); } catch(e) { wrongHistory = []; }
+
+// Dark mode
+function toggleDark(cb) {
+  const isDark = cb.checked;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('toggle-thumb').textContent = isDark ? '☀️' : '🌙';
+  try { localStorage.setItem('eq_dark', isDark ? '1' : '0'); } catch(e) {}
+}
+(function() {
+  try {
+    const saved = localStorage.getItem('eq_dark');
+    if (saved === '1') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('dark-toggle').checked = true;
+      document.getElementById('toggle-thumb').textContent = '☀️';
+    }
+  } catch(e) {}
+})();
+
+function selectMode(el) {
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  mode = el.dataset.mode;
+}
+
+function startQuiz() {
+  round = 1; roundResults = []; sessionWrong = [];
+  if (mode === 'wrongonly' && wrongHistory.length > 0) {
+    remaining = [...wrongHistory];
+  } else {
+    remaining = ALL_Q.map((_, i) => i);
+    wrongHistory = [];
+  }
+  current = 0;
+  showScreen('screen-quiz');
+  loadQ();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function loadQ() {
+  clearTimer(); answered = false;
+  const idx = remaining[current], q = ALL_Q[idx], total = remaining.length;
+  document.getElementById('pfill').style.width = (current / total * 100) + '%';
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('round-badge').textContent = `Round ${round}`;
+  document.getElementById('q-num').textContent = `Q${idx + 1}`;
+  document.getElementById('q-text').textContent = q.q;
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback'; fb.textContent = '';
+  const btn = document.getElementById('btn-next');
+  btn.disabled = true;
+  btn.textContent = current === total - 1 ? 'See Results →' : 'Next Question →';
+  const grid = document.getElementById('opts');
+  grid.innerHTML = '';
+  ['A','B','C','D'].forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = `<span class="opt-lbl">${opt}</span> ${q[opt]}`;
+    b.onclick = () => answer(opt, b);
+    grid.appendChild(b);
+  });
+  if (mode === 'timed') {
+    timerSec = 30;
+    const tb = document.getElementById('timer-badge');
+    tb.style.display = 'flex'; tb.className = 'badge badge-timer';
+    document.getElementById('timer-val').textContent = timerSec;
+    timerInt = setInterval(() => {
+      timerSec--;
+      document.getElementById('timer-val').textContent = timerSec;
+      if (timerSec <= 10) document.getElementById('timer-badge').className = 'badge badge-timer urgent';
+      if (timerSec <= 0) { clearTimer(); autoWrong(); }
+    }, 1000);
+  } else {
+    document.getElementById('timer-badge').style.display = 'none';
+  }
+}
+
+function clearTimer() { if (timerInt) { clearInterval(timerInt); timerInt = null; } }
+
+function autoWrong() {
+  if (answered) return;
+  answered = true;
+  const idx = remaining[current], q = ALL_Q[idx];
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    if (b.querySelector('.opt-lbl').textContent === q.ans) b.classList.add('missed');
+  });
+  showFeedback(false, null, q.ans, q);
+  roundResults.push({ idx, correct: false, user: null });
+  sessionWrong.push(idx);
+  document.getElementById('btn-next').disabled = false;
+}
+
+function answer(opt, btn) {
+  if (answered) return;
+  answered = true; clearTimer();
+  const idx = remaining[current], q = ALL_Q[idx], correct = opt === q.ans;
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    const lbl = b.querySelector('.opt-lbl').textContent;
+    if (lbl === q.ans) b.classList.add(correct ? 'correct' : 'missed');
+  });
+  if (!correct) btn.classList.add('wrong');
+  showFeedback(correct, opt, q.ans, q);
+  roundResults.push({ idx, correct, user: opt });
+  if (!correct) sessionWrong.push(idx);
+  document.getElementById('btn-next').disabled = false;
+}
+
+function showFeedback(correct, user, ans, q) {
+  const fb = document.getElementById('feedback');
+  if (correct) {
+    fb.className = 'feedback show-correct';
+    fb.textContent = '✓ Correct! Well done.';
+  } else {
+    fb.className = 'feedback show-wrong';
+    fb.textContent = `✗ Wrong! Correct answer: ${ans}. ${q[ans]}`;
+  }
+}
+
+function nextQ() {
+  current++;
+  if (current >= remaining.length) endRound();
+  else loadQ();
+}
+
+function endRound() {
+  clearTimer();
+  const correct = roundResults.filter(r => r.correct).length;
+  const total = roundResults.length;
+  if (sessionWrong.length === 0) {
+    showCongrats(correct, total); wrongHistory = [];
+    try { localStorage.setItem('eq_wrong', '[]'); } catch(e) {}
+    return;
+  }
+  wrongHistory = [...new Set(sessionWrong)];
+  try { localStorage.setItem('eq_wrong', JSON.stringify(wrongHistory)); } catch(e) {}
+  showRoundResults(correct, total);
+}
+
+function showRoundResults(correct, total) {
+  const pct = Math.round(correct / total * 100);
+  const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+  let reviewHTML = roundResults.filter(r => !r.correct).map(r => {
+    const q = ALL_Q[r.idx];
+    return `<div class="ri wrong">
+      <div class="ri-q">Q${r.idx+1}. ${q.q}</div>
+      <div class="ri-ans">
+        <span class="ri-c">✓ ${q.ans}: ${q[q.ans]}</span>
+        ${r.user ? `<span class="ri-u">✗ You chose ${r.user}: ${q[r.user]}</span>` : `<span class="ri-u">⏱ Time ran out</span>`}
+      </div></div>`;
+  }).join('');
+  document.getElementById('results-content').innerHTML = `
+    <div class="results-hero">
+      <div class="score-ring"><span class="sn">${pct}%</span><span class="sl">Score</span></div>
+      <h2>${emoji} Round ${round} Complete</h2>
+      <p class="sub">${correct} of ${total} correct · ${sessionWrong.length} question${sessionWrong.length!==1?'s':''} to retry</p>
+      <div class="res-stats">
+        <div class="rs g"><div class="rv">${correct}</div><div class="rl">Correct</div></div>
+        <div class="rs r"><div class="rv">${total-correct}</div><div class="rl">Wrong</div></div>
+        <div class="rs b"><div class="rv">${pct}%</div><div class="rl">Accuracy</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-sec" onclick="goHome()">🏠 Home</button>
+        <button class="btn-pri" onclick="nextRound()">Next Round → (${sessionWrong.length} Qs)</button>
+      </div>
+    </div>
+    ${reviewHTML ? `<div class="review-section"><h3>Questions to review (${sessionWrong.length})</h3>${reviewHTML}</div>` : ''}`;
+  showScreen('screen-results');
+}
+
+function showCongrats(correct, total) {
+  document.getElementById('results-content').innerHTML = `
+    <div class="congrats-banner">
+      <div class="trophy">🏆</div>
+      <h2>Perfect Score!</h2>
+      <p>You answered all ${ALL_Q.length} questions correctly across ${round} round${round!==1?'s':''}!</p>
+    </div>
+    <div class="results-hero">
+      <div class="score-ring"><span class="sn">100%</span><span class="sl">Score</span></div>
+      <h2>Quiz Complete!</h2>
+      <p class="sub">Congratulations! You mastered all ${ALL_Q.length} questions.</p>
+      <div class="res-stats">
+        <div class="rs g"><div class="rv">${ALL_Q.length}</div><div class="rl">Correct</div></div>
+        <div class="rs b"><div class="rv">${round}</div><div class="rl">Rounds</div></div>
+        <div class="rs g"><div class="rv">100%</div><div class="rl">Accuracy</div></div>
+      </div>
+      <div class="btn-row"><button class="btn-pri" onclick="goHome()">🏠 Play Again</button></div>
+    </div>`;
+  showScreen('screen-results');
+}
+
+function nextRound() {
+  round++; remaining = [...new Set(sessionWrong)];
+  sessionWrong = []; roundResults = []; current = 0;
+  showScreen('screen-quiz'); loadQ();
+}
+
+function goHome() { showScreen('screen-home'); }
+</script>
+</body>
+</html>
